@@ -1,0 +1,6 @@
+{
+  "name": "Jeeey Network AI Mobile",
+  "description": "نظام إدارة ومراقبة شبكات مايكروتك الذكي المدعوم بالذكاء الاصطناعي - AI-powered MikroTik RouterOS Management & Monitoring Suite",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

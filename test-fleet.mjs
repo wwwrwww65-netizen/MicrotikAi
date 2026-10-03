@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+process.env.APP_API_KEY='test-secret-fleet';
+process.env.FLEET_VAULT_KEY='test-vault-key';
+process.env.MIKROTIK_HOST='172.16.0.1';
+process.env.MIKROTIK_USER='akram';
+process.env.MIKROTIK_PASS='test';
+const fleet = await import('./fleet-manager.mjs');
+const rows = await fleet.listRouters({includeSecrets:false});
+assert.ok(rows.some(r => r.id === 'main'));
+assert.equal(rows.find(r => r.id === 'main').host, '172.16.0.1');
+const created = await fleet.upsertRouter({id:'test-router',name:'Test Router',host:'10.0.0.2',port:8728,user:'u',pass:'p',mode:'v6api'});
+assert.equal(created.id,'test-router'); assert.equal(created.hasPassword,true); assert.equal(created.pass,undefined);
+const stored = await fleet.getRouter('test-router'); assert.equal(stored.pass,'p');
+assert.equal(await fleet.deleteRouter('test-router'),true);
+await fs.rm('./router-vault.json',{force:true});
+console.log('FLEET_TEST_OK');

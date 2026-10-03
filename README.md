@@ -1,11 +1,42 @@
-<div align="center">
+# Jeeey Network AI v0.7.0
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+مساعد إدارة شبكات MikroTik من الجوال/Termux، مبني فوق RouterOS API وGemini Function Calling.
 
-  <h1>Built with AI Studio</h2>
+## ما الجديد في v0.7
+- إدارة Fleet متعددة الراوترات.
+- خزنة محلية مشفرة لبيانات الراوترات الإضافية.
+- اختيار الراوتر الحالي من الواجهة.
+- ذاكرة شبكة منفصلة لكل راوتر.
+- تجميع تاريخي لحركة المرور كل 60 ثانية.
+- كشف ارتفاعات غير معتادة وQueue drops وواجهات down.
+- مراقبة تلقائية وتنبيهات دورية.
+- بحث اختياري في وثائق MikroTik الرسمية.
+- المساعد يستعمل الأدوات حسب الراوتر المحدد.
+- تحليلات تاريخية وواجهة Fleet/Analytics.
+- الحفاظ على RouterOS client العامل وطبقة الإصلاح/rollback/backup الحالية.
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+## تشغيل الهاتف
+```bash
+cd /sdcard/jeeey-network-ai-mobile
+npm start
+```
+ثم افتح `http://127.0.0.1:8787`.
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+## اختبارات المشروع
+```bash
+npm run test:all
+```
 
-</div>
+## Gemini
+الوضع الافتراضي `Auto`. المشروع يفحص Models API ويختار النماذج القابلة للاستخدام، ثم يطبق fallback عند الأخطاء المؤقتة، ويحوّل إلى المساعد المحلي إذا استُنفدت الحصة أو فشل كل النماذج.
+
+## الأمان
+- ملفات `router-vault.json` مشفرة باستخدام AES-256-GCM بمفتاح `FLEET_VAULT_KEY` أو `APP_API_KEY`.
+- لا يوضع `.env` داخل الحزمة الموزعة.
+- الأوامر التغييرية والحساسة تحتاج موافقة.
+- الإصلاحات التغييرية تستخدم preflight وhealth checks وrollback عبر RouterOS history عندما يكون ذلك آمنًا.
+
+## حدود مهمة
+- معرفة استهلاك الإنترنت على مستوى التطبيق/الدومين تحتاج قياسًا مناسبًا مثل Traffic Flow/DNS، ولا يمكن استنتاج محتوى HTTPS المشفر من عدادات الواجهات وحدها.
+- بحث الوثائق يعتمد على توفر اتصال الويب من الجهاز؛ عند فشله لا يتم اختلاق نتيجة.
+- النسخ الاحتياطية المجدولة تحتاج أن يبقى Scheduler في RouterOS مفعّلًا، بينما جمع تحليلات التطبيق يعتمد على بقاء Jeeey Network AI/Termux قيد التشغيل.

@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+const file=path.join(process.cwd(),'traffic-history.json');
+await fs.rm(file,{force:true});
+const mod=await import('./traffic-history.mjs');
+const make=(rx,tx,drop=0)=>({command:async(cmd)=>cmd.includes('monitor-traffic')?[{'rx-bits-per-second':String(rx),'tx-bits-per-second':String(tx),'rx-packets-per-second':'2','tx-packets-per-second':'1'}]:[{name:'IN',running:'true','rx-byte':String(rx*10),'tx-byte':String(tx*10),'link-downs':'0','tx-queue-drop':String(drop)}]});
+for (const [rx,tx,drop] of [[1000,500,0],[1100,550,0],[1200,600,0],[9000,4000,21]]) await mod.recordTrafficSnapshot({routerId:'main',client:make(rx,tx,drop)});
+const s=await mod.historySummary({routerId:'main',hours:24});
+assert.equal(s.samples,4); assert.equal(s.peakRxBps,9000);
+const a=await mod.anomalies({routerId:'main',hours:24}); assert.ok(a.anomalies.length>0);
+await fs.rm(file,{force:true});
+console.log('TRAFFIC_HISTORY_TEST_OK');

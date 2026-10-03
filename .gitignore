@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+node_modules/
+*.log
+chats.json
+router-vault.json
+traffic-history.json
+monitor-state.json
+network-memory.json
+network-memory-*.json
+data.json
+repair-snapshots/

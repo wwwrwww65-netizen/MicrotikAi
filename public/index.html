@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="auto">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f6f7fb" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Jeeey Network AI</title>
+  <meta name="description" content="لوحة تحكم ذكية لمراقبة وإدارة شبكة MikroTik" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">تخطي إلى المحتوى</a>
+
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="التنقل الرئيسي">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">J</div>
+        <div class="brand-copy">
+          <strong>Jeeey</strong>
+          <span>Network AI</span>
+        </div>
+      </div>
+
+      <div class="router-summary">
+        <span class="status-dot" id="sidebarStatusDot"></span>
+        <div>
+          <strong id="sidebarRouterName">MikroTik</strong>
+          <span id="sidebarRouterMeta">جارٍ الاتصال…</span>
+        </div>
+      </div>
+
+      <nav class="nav-list">
+        <a class="nav-item active" href="#overview" data-nav="overview"><span class="nav-icon">◈</span><span>نظرة عامة</span></a>
+        <a class="nav-item" href="#network" data-nav="network"><span class="nav-icon">⌁</span><span>الشبكة</span></a>
+        <a class="nav-item" href="#users" data-nav="users"><span class="nav-icon">◎</span><span>المستخدمون</span></a>
+        <a class="nav-item" href="#alerts" data-nav="alerts"><span class="nav-icon">△</span><span>التنبيهات</span></a>
+        <a class="nav-item" href="#routers" data-nav="routers"><span class="nav-icon">◉</span><span>الأجهزة</span></a>
+        <a class="nav-item" href="#analytics" data-nav="analytics"><span class="nav-icon">▥</span><span>التحليلات</span></a>
+        <a class="nav-item" href="#assistant" data-nav="assistant"><span class="nav-icon">✦</span><span>المساعد</span></a>
+        <a class="nav-item" href="#commands" data-nav="commands"><span class="nav-icon">⌘</span><span>الترمنل</span></a>
+        <a class="nav-item" href="#sales" data-nav="sales"><span class="nav-icon">◇</span><span>المبيعات</span></a>
+        <a class="nav-item" href="#backups" data-nav="backups"><span class="nav-icon">▣</span><span>النسخ الاحتياطي</span></a>
+      </nav>
+
+      <div class="sidebar-foot">
+        <button class="sidebar-action" id="quickScan" type="button"><span>✦</span> فحص ذكي</button>
+        <div class="safe-note"><span>✓</span><span>التغييرات الحساسة تتطلب موافقة</span></div>
+      </div>
+    </aside>
+
+    <div class="main-area">
+      <header class="topbar">
+        <div class="topbar-leading">
+          <button class="icon-btn mobile-menu" id="mobileMenu" type="button" aria-label="فتح القائمة" aria-expanded="false">☰</button>
+          <div>
+            <div class="eyebrow">مركز عمليات الشبكة</div>
+            <h1>نظرة عامة</h1>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <label class="router-switch-wrap"><span class="sr-only">الراوتر الحالي</span><select id="routerSelect" class="router-switch" aria-label="اختيار الراوتر"></select></label>
+          <div class="connection-chip" id="connectionChip" aria-live="polite">
+            <span class="status-dot"></span>
+            <span>جارٍ التحقق…</span>
+          </div>
+          <button class="icon-btn" id="refresh" type="button" aria-label="تحديث البيانات" title="تحديث">↻</button>
+          <button class="icon-btn" id="themeToggle" type="button" aria-label="تغيير المظهر" title="المظهر">◐</button>
+        </div>
+      </header>
+
+      <main id="main" class="content page-host" tabindex="-1">
+        <section id="overview" class="section-block route-page is-active" data-page-title="نظرة عامة">
+          <div class="hero-grid">
+            <article class="hero-card">
+              <div class="hero-head">
+                <div>
+                  <span class="eyebrow">حالة الشبكة</span>
+                  <h2 id="healthTitle">جارٍ تحليل الحالة…</h2>
+                  <p id="healthSub" class="subtext">يتم جمع القياسات من RouterOS.</p>
+                </div>
+                <div class="health-orb" id="healthOrb" aria-hidden="true"><span>—</span></div>
+              </div>
+              <div class="hero-metrics">
+                <div><span>CPU</span><strong id="heroCpu">—</strong></div>
+                <div><span>الذاكرة</span><strong id="heroRam">—</strong></div>
+                <div><span>المستخدمون</span><strong id="heroUsers">—</strong></div>
+                <div><span>التنبيهات</span><strong id="heroAlerts">—</strong></div>
+              </div>
+            </article>
+            <article class="router-card">
+              <div class="section-title-row">
+                <div><span class="eyebrow">الجهاز الرئيسي</span><h3 id="routerModel">MikroTik</h3></div>
+                <span class="soft-badge" id="aiProviderBadge">محلي</span>
+              </div>
+              <dl class="router-meta-grid">
+                <div><dt>الإصدار</dt><dd id="routerVersion">—</dd></div>
+                <div><dt>المعمارية</dt><dd id="routerArch">—</dd></div>
+                <div><dt>مدة التشغيل</dt><dd id="routerUptime">—</dd></div>
+                <div><dt>الوضع</dt><dd id="routerMode">—</dd></div>
+              </dl>
+              <button class="primary-btn wide" id="heroScan" type="button"><span>✦</span> شغّل الفحص الذكي</button>
+            </article>
+          </div>
+          <div class="kpi-grid" aria-label="المؤشرات الرئيسية">
+            <article class="metric-card"><div class="metric-icon blue">◎</div><div><span>الجلسات النشطة</span><strong id="kpiUsers">—</strong><small>HotSpot الآن</small></div></article>
+            <article class="metric-card"><div class="metric-icon purple">↕</div><div><span>الاستهلاك الظاهر</span><strong id="kpiUsage">—</strong><small>جلسات نشطة</small></div></article>
+            <article class="metric-card"><div class="metric-icon green">◇</div><div><span>المبيعات اليوم</span><strong id="kpiSales">—</strong><small id="kpiSalesCount">— عملية</small></div></article>
+            <article class="metric-card"><div class="metric-icon amber">△</div><div><span>تنبيهات مفتوحة</span><strong id="kpiAlerts">—</strong><small>تحتاج متابعة</small></div></article>
+          </div>
+        </section>
+
+        <section id="network" class="section-block route-page" data-page-title="الشبكة والأداء">
+          <div class="section-heading"><div><span class="eyebrow">Network</span><h2>الشبكة والأداء</h2></div><span id="lastUpdate" class="muted-pill">—</span></div>
+          <div class="network-layout">
+            <article class="panel panel-large">
+              <div class="panel-headline"><div><h3>الواجهات</h3><p>الحالة والعدادات الحالية لكل واجهة.</p></div><span class="live-pill"><i></i> مباشر</span></div>
+              <div id="interfaces" class="interface-grid"></div>
+            </article>
+            <article class="panel traffic-card">
+              <div class="panel-headline"><div><h3>إشارة الاستهلاك</h3><p>لقطة سريعة من واجهات RouterOS.</p></div><button class="text-btn" id="openTrafficHelp" type="button">كيف تُقرأ؟</button></div>
+              <div class="traffic-visual" id="trafficVisual"></div>
+              <div class="traffic-legend"><span><i class="legend-dot rx"></i> RX</span><span><i class="legend-dot tx"></i> TX</span></div>
+              <div class="traffic-foot"><strong id="trafficPrimary">—</strong><span id="trafficPrimaryMeta">—</span></div>
+            </article>
+          </div>
+        </section>
+
+        <section id="users" class="section-block route-page" data-page-title="المستخدمون">
+          <div class="section-heading"><div><span class="eyebrow">HotSpot</span><h2>المستخدمون</h2></div><button class="ghost-btn" id="askTopUsers" type="button">حلّل الأعلى استهلاكًا</button></div>
+          <article class="panel table-panel">
+            <div class="table-toolbar"><div><strong>أعلى المستخدمين استهلاكًا</strong><span>حسب البيانات المتاحة للجلسات النشطة</span></div><span class="soft-badge" id="usersCountBadge">—</span></div>
+            <div class="table-scroll"><table><thead><tr><th>المستخدم</th><th>العنوان</th><th>الجلسة</th><th>الاستهلاك</th></tr></thead><tbody id="users"></tbody></table></div>
+          </article>
+        </section>
+
+        <section id="alerts" class="section-block route-page" data-page-title="التنبيهات">
+          <div class="section-heading"><div><span class="eyebrow">Monitoring</span><h2>التنبيهات</h2></div><span class="muted-pill" id="alertCount">—</span></div>
+          <div id="alertsList" class="alert-grid"></div>
+        </section>
+
+        <section id="routers" class="section-block route-page" data-page-title="الأجهزة">
+          <div class="section-heading"><div><span class="eyebrow">Fleet</span><h2>أجهزة MikroTik</h2><p class="subtext">أدر أكثر من راوتر من نفس لوحة التحكم.</p></div><button class="ghost-btn" id="refreshRouters" type="button">↻ تحديث</button></div>
+          <div id="routerCards" class="router-fleet-grid"></div>
+          <article class="panel fleet-add-panel">
+            <div class="panel-headline"><div><h3>إضافة راوتر</h3><p>بيانات الاتصال تُحفظ محليًا في خزنة مشفّرة على الهاتف.</p></div><span class="soft-badge">RouterOS API</span></div>
+            <div class="form-grid three">
+              <label>الاسم<input id="fleetName" placeholder="فرع صنعاء" /></label>
+              <label>العنوان<input id="fleetHost" placeholder="192.168.88.1" /></label>
+              <label>المنفذ<input id="fleetPort" value="8728" inputmode="numeric" /></label>
+              <label>المستخدم<input id="fleetUser" placeholder="api-user" /></label>
+              <label>كلمة المرور<input id="fleetPass" type="password" autocomplete="new-password" /></label>
+              <label>النمط<select id="fleetMode"><option value="v6api">RouterOS v6/v6 API</option><option value="v7rest">RouterOS v7 REST</option></select></label>
+            </div>
+            <div class="button-row"><button class="primary-btn" id="addRouterBtn" type="button">إضافة واختبار الاتصال</button></div>
+          </article>
+        </section>
+
+        <section id="analytics" class="section-block route-page" data-page-title="التحليلات">
+          <div class="section-heading"><div><span class="eyebrow">Analytics</span><h2>تحليلات الشبكة</h2><p class="subtext">تاريخ السرعة والتنبيهات واكتشاف الارتفاعات غير المعتادة.</p></div><div class="button-row"><select id="analyticsHours" class="small-select"><option value="6">آخر 6 ساعات</option><option value="24" selected>آخر 24 ساعة</option><option value="72">آخر 3 أيام</option></select><button class="ghost-btn" id="refreshAnalytics" type="button">↻ تحديث</button></div></div>
+          <div class="analytics-kpis">
+            <article class="metric-card"><div class="metric-icon blue">↓</div><div><span>متوسط RX</span><strong id="avgRx">—</strong><small>الواجهة الرئيسية</small></div></article>
+            <article class="metric-card"><div class="metric-icon purple">↑</div><div><span>متوسط TX</span><strong id="avgTx">—</strong><small>الواجهة الرئيسية</small></div></article>
+            <article class="metric-card"><div class="metric-icon amber">⌁</div><div><span>ذروة RX</span><strong id="peakRx">—</strong><small>أعلى قراءة</small></div></article>
+            <article class="metric-card"><div class="metric-icon green">△</div><div><span>تنبيهات غير طبيعية</span><strong id="anomalyCount">—</strong><small>ضمن الفترة</small></div></article>
+          </div>
+          <article class="panel analytics-chart-panel"><div class="panel-headline"><div><h3>الحركة اللحظية المسجلة</h3><p id="analyticsMeta">—</p></div></div><div id="trafficBars" class="traffic-bars"></div></article>
+          <article class="panel analytics-anomalies"><div class="panel-headline"><div><h3>الارتفاعات والمشاكل المكتشفة</h3></div></div><div id="anomaliesList" class="simple-list"></div></article>
+        </section>
+
+        <section id="assistant" class="section-block route-page assistant-fullpage" data-page-title="المساعد الذكي">
+          <div class="chat-app-container">
+            <!-- Slide-out Conversation History Drawer -->
+            <aside class="chat-history-drawer" id="chatHistoryDrawer" aria-label="سجل المحادثات">
+              <div class="drawer-header">
+                <div class="drawer-title">
+                  <span class="drawer-icon">💬</span>
+                  <div>
+                    <strong>سجل المحادثات</strong>
+                    <span>محفوظة محلياً على الجهاز</span>
+                  </div>
+                </div>
+                <button class="icon-btn small drawer-close-btn" id="closeChatDrawer" type="button" aria-label="إغلاق السجل">✕</button>
+              </div>
+              <div class="drawer-action-row">
+                <button class="primary-btn compact wide" id="newChatDrawer" type="button"><span>＋</span> محادثة جديدة</button>
+              </div>
+              <div id="chatList" class="chat-list"></div>
+            </aside>
+            <div class="chat-drawer-backdrop" id="chatDrawerBackdrop"></div>
+
+            <!-- Main Full-Page Chat Viewport -->
+            <article class="chat-main-viewport">
+              <!-- Modern Chat App Header -->
+              <header class="chat-app-header">
+                <div class="chat-header-left">
+                  <button class="chat-history-toggle-btn" id="toggleChatDrawer" type="button" aria-label="فتح سجل المحادثات" title="سجل المحادثات">
+                    <span class="hamburger-icon">☰</span>
+                    <span class="history-label">المحادثات</span>
+                  </button>
+                </div>
+
+                <div class="chat-header-center">
+                  <div class="active-chat-badge">
+                    <span class="ai-sparkle">✦</span>
+                    <strong id="activeChatTitle">محادثة جديدة</strong>
+                    <div class="chat-header-actions">
+                      <button id="renameChat" class="icon-btn tiny" type="button" title="إعادة تسمية المحادثة">✎</button>
+                      <button id="deleteChat" class="icon-btn tiny danger-text" type="button" title="حذف المحادثة">⌫</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="chat-header-right">
+                  <button class="new-chat-top-btn" id="newChat" type="button" title="محادثة جديدة">
+                    <span>＋</span>
+                    <span class="new-chat-label">جديدة</span>
+                  </button>
+                </div>
+              </header>
+
+              <!-- Scrollable Messages Stream -->
+              <div class="chat-stream-container">
+                <div id="chat" class="chat" role="log" aria-live="polite" aria-label="محادثة المساعد">
+                  <div class="chat-welcome-card" id="chatWelcomeCard">
+                    <div class="welcome-avatar">✦</div>
+                    <h3>مساعد Jeeey الذكي لشبكات MikroTik</h3>
+                    <p>مساعد ذكي يقرأ حالة الراوتر الفعلية، يفحص الواجهات، الجلسات، التنبيهات، ويقترح حلولاً فورية وآمنة.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Fixed Bottom Composer Area -->
+              <footer class="chat-composer-fixed">
+                <!-- Prompt Suggestions -->
+                <div class="prompt-suggestions" aria-label="اقتراحات سريعة">
+                  <button type="button" data-prompt="افحص الشبكة بالكامل">⚡ افحص الشبكة</button>
+                  <button type="button" data-prompt="من أكثر مستخدم استهلاكًا؟">📊 أعلى استهلاك</button>
+                  <button type="button" data-prompt="هل توجد مشاكل أو تنبيهات الآن؟">⚠️ تحليل المشاكل</button>
+                  <button type="button" data-prompt="أعطني حالة الراوتر والـ CPU">🖥️ حالة الراوتر</button>
+                </div>
+
+                <!-- Input Box with Integrated Model Selector -->
+                <div class="chat-composer-box">
+                  <div class="composer-top-bar">
+                    <div class="model-picker-pill">
+                      <span class="model-icon">🧠</span>
+                      <select id="aiModelSelect" aria-label="اختيار نموذج Gemini">
+                        <option value="auto">Auto • ديناميكي</option>
+                      </select>
+                      <span class="ai-live-model" id="aiLiveModel">Auto</span>
+                    </div>
+                    <span class="soft-badge safe-status" id="assistantStatus">جاهز</span>
+                  </div>
+
+                  <div class="composer-input-row">
+                    <textarea id="prompt" rows="1" placeholder="اكتب سؤالك أو أمرك للشبكة… (مثل: لماذا الإنترنت بطيء؟)"></textarea>
+                    <button id="send" class="send-btn" type="button" aria-label="إرسال">➤</button>
+                  </div>
+
+                  <div class="composer-footer-meta">
+                    <span id="chatMeta" aria-live="polite">Gemini • أدوات RouterOS مفعلة وتتطلب تأكيد للتغييرات الحساسة</span>
+                  </div>
+                </div>
+              </footer>
+            </article>
+          </div>
+        </section>
+
+        <section id="commands" class="section-block route-page" data-page-title="الترمنل">
+          <div class="section-heading"><div><span class="eyebrow">RouterOS</span><h2>الترمنل</h2></div><span class="muted-pill">الأوامر الحساسة تحتاج موافقة</span></div>
+          <article class="panel terminal-panel">
+            <div class="terminal-toolbar"><div><strong>Console</strong><span>تنفيذ مباشر عبر RouterOS API</span></div><div class="command-chips"><button data-command="/system resource print" type="button">الموارد</button><button data-command="/interface print" type="button">الواجهات</button><button data-command="/ip hotspot active print" type="button">HotSpot</button><button data-command="/queue simple print stats" type="button">Queues</button></div></div>
+            <div class="command-row"><textarea id="command" rows="2" placeholder="/system resource print"></textarea><button id="prepare" class="ghost-btn" type="button">فحص الأمر</button><button id="execute" class="primary-btn" disabled type="button">تنفيذ</button></div>
+            <pre id="commandResult" class="terminal" aria-live="polite"></pre>
+          </article>
+        </section>
+
+        <section id="sales" class="section-block route-page" data-page-title="المبيعات">
+          <div class="section-heading"><div><span class="eyebrow">Business</span><h2>المبيعات</h2></div><span class="muted-pill" id="salesSummary">—</span></div>
+          <article class="panel table-panel">
+            <div class="table-toolbar"><div><strong>آخر العمليات</strong><span>المبيعات المسجلة محليًا على الجهاز</span></div></div>
+            <div id="sales" class="sales-list"></div>
+          </article>
+        </section>
+        <section id="backups" class="section-block route-page" data-page-title="النسخ الاحتياطي">
+          <div class="section-heading"><div><span class="eyebrow">Protection</span><h2>النسخ الاحتياطي والاستعادة</h2></div><button class="ghost-btn" id="refreshBackups" type="button">↻ تحديث</button></div>
+          <div class="backup-grid">
+            <article class="panel backup-card">
+              <div class="panel-headline"><div><h3>إنشاء نسخة الآن</h3><p>نسخة Binary مشفّرة، مناسبة للاستعادة على نفس إصدار RouterOS.</p></div><span class="soft-badge">RouterOS</span></div>
+              <div class="form-grid">
+                <label>اسم النسخة<input id="backupName" placeholder="مثال: jeeey-manual-01"></label>
+                <label>كلمة مرور التشفير<input id="backupPassword" type="password" placeholder="لا ترسلها هنا"></label>
+              </div>
+              <div class="button-row"><button class="primary-btn" id="createBackup" type="button">إنشاء نسخة مشفّرة</button><button class="ghost-btn" id="exportConfig" type="button">تصدير RSC</button></div>
+              <div class="muted-note">ملف RSC نصّي لا يتضمن بعض الأسرار وقواعد بيانات User Manager. النسخة Binary تصلح أساسًا للاستعادة الكاملة على نفس الجهاز/الإصدار.</div>
+            </article>
+            <article class="panel backup-card">
+              <div class="panel-headline"><div><h3>النسخ التلقائي</h3><p>الجدولة تُثبت على RouterOS نفسه، فلا تتوقف إذا أغلقت لوحة الهاتف.</p></div><span class="live-pill"><i></i> دائم</span></div>
+              <div class="form-grid three">
+                <label>وقت التنفيذ<input id="backupTime" type="time" value="03:00"></label>
+                <label>التكرار<select id="backupInterval"><option value="1d">يومي</option><option value="7d">أسبوعي</option><option value="3d">كل 3 أيام</option></select></label>
+                <label>كلمة مرور النسخ<input id="schedulePassword" type="password" placeholder="تشفير النسخ"></label>
+              </div>
+              <div class="button-row"><button class="primary-btn" id="scheduleBackup" type="button">حفظ الجدولة</button><button class="ghost-btn danger-outline" id="disableBackupSchedule" type="button">تعطيل الجدولة</button></div>
+              <div id="backupScheduleState" class="schedule-state">جارٍ تحميل الجدولة…</div>
+            </article>
+          </div>
+          <article class="panel table-panel backup-list-panel">
+            <div class="table-toolbar"><div><strong>النسخ الموجودة على الراوتر</strong><span>يتم عرض ملفات .backup و .rsc</span></div><span class="soft-badge" id="backupCount">—</span></div>
+            <div class="table-scroll"><table><thead><tr><th>الاسم</th><th>النوع</th><th>الحجم</th><th>التاريخ</th><th>إجراء</th></tr></thead><tbody id="backupRows"></tbody></table></div>
+          </article>
+          <div class="security-note panel"><strong>تنبيه</strong><p>استعادة Binary قد تعيد تشغيل الراوتر. الاستعادة/الاستيراد لا تُنفذ إلا بعد تأكيد صريح. احتفظ بنسخك في مكان آمن ومشفّر.</p></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <nav class="mobile-nav" aria-label="تنقل الهاتف">
+    <a href="#overview" data-nav="overview"><span>◈</span><small>الرئيسية</small></a>
+    <a href="#network" data-nav="network"><span>⌁</span><small>الشبكة</small></a>
+    <a href="#users" data-nav="users"><span>◎</span><small>المستخدمون</small></a>
+    <a href="#assistant" data-nav="assistant"><span>✦</span><small>المساعد</small></a>
+    <a href="#commands" data-nav="commands"><span>⌘</span><small>الترمنل</small></a>
+    <a href="#backups" data-nav="backups"><span>▣</span><small>النسخ</small></a>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js?v=6"></script>
+  <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+</body>
+</html>

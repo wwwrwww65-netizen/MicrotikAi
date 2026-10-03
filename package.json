@@ -1,0 +1,26 @@
+{
+  "name": "jeeey-network-ai-mobile",
+  "version": "0.7.1",
+  "private": true,
+  "description": "Jeeey Network AI: mobile/PWA MikroTik fleet assistant with AI diagnostics, safe remediation, backups, traffic history, and multi-router management.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs",
+    "test": "node test.mjs",
+    "test:routeros": "node test-routeros.mjs",
+    "gemini:check": "node check-gemini.mjs",
+    "gemini:function-check": "node check-gemini-tools.mjs",
+    "gemini:fallback-test": "node test-gemini-fallback.mjs",
+    "test:ai-policy": "node test-ai-policy.mjs",
+    "test:ai-stream": "node test-ai-stream.mjs",
+    "test:gemini-tool-guard": "node test-gemini-tool-guard.mjs",
+    "test:remediation": "node test-remediation.mjs",
+    "test:network-memory": "node test-network-memory.mjs",
+    "test:fleet": "node test-fleet.mjs",
+    "test:traffic": "node test-traffic-history.mjs",
+    "test:docs": "node test-docs-research.mjs",
+    "test:all": "npm run test && npm run test:routeros && npm run test:ai-policy && npm run test:ai-stream && npm run test:gemini-tool-guard && npm run test:remediation && npm run test:network-memory && npm run test:gemini-fallback && npm run test:fleet && npm run test:traffic && npm run test:docs",
+    "test:gemini-fallback": "node test-gemini-fallback.mjs"
+  }
+}

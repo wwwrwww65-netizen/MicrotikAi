@@ -1,0 +1,11 @@
+{
+  "name": "Jeeey Network AI",
+  "short_name": "Jeeey AI",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f7fb",
+  "theme_color": "#8a1538",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [{"src":"/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
