@@ -147,6 +147,8 @@ function setRoute(id, updateHash=true){
   document.title=`${PAGE_TITLES[page]} • Jeeey Network AI`;
   if(updateHash){ history.replaceState(null,'',`#${page}`); }
   $('.sidebar')?.classList.remove('open');
+  $('#sidebarBackdrop')?.classList.remove('open');
+  $('#mobileMenu')?.setAttribute('aria-expanded','false');
   if(page==='backups') loadBackups();
   if(page==='routers') loadRouters();
   if(page==='analytics') loadAnalytics();
@@ -191,6 +193,16 @@ async function loadAnalytics(){
     const list=$('#anomaliesList'); if(list){ list.innerHTML=(a.anomalies||[]).slice(-20).reverse().map(x=>`<div class="simple-list-row"><strong>${esc(x.type)}</strong><span>${esc(x.interface||'—')}</span><small>${esc(x.at||'')}</small></div>`).join('')||'<div class="history-empty">لا توجد مؤشرات غير طبيعية.</div>'; }
   }catch(e){ setText('#analyticsMeta',e.message); }
 }
+function askAiAboutProblem(promptText){
+  const promptInput=$('#prompt');
+  if(promptInput){
+    promptInput.value=promptText;
+    promptInput.style.height='auto';
+  }
+  setRoute('assistant',true);
+  sendPrompt(promptText);
+}
+
 function renderOverview(o,s,alerts,ai){
   state.overview=o; state.sales=s; state.alerts=alerts; state.ai=ai;
   const routerOS = o.mode==='routeros';
@@ -206,14 +218,52 @@ function renderOverview(o,s,alerts,ai){
   setText('#assistantStatus', ai?.configured?'متصل':'محلي');
 
   const activeUsers=o.users||[]; const total=activeUsers.reduce((x,u)=>x+Number(u.totalBytes||0),0); const openAlerts=(alerts||[]).filter(a=>!a.acknowledged);
-  const cpu=Number(o.resource?.['cpu-load']||0); const health = openAlerts.some(a=>a.severity==='critical') ? 'حرج' : openAlerts.length ? 'يحتاج انتباه' : cpu>=80 ? 'ضغط مرتفع' : 'مستقرة';
+  const criticalAlerts=openAlerts.filter(a=>a.severity==='critical');
+  const cpu=Number(o.resource?.['cpu-load']||0);
+  const health = criticalAlerts.length ? 'حرج' : openAlerts.length ? 'يحتاج انتباه' : cpu>=80 ? 'ضغط مرتفع' : 'مستقرة';
+  
+  let problemMsg = '';
+  let problemBadge = '';
+  let problemPrompt = '';
+
+  if(criticalAlerts.length > 0){
+    problemMsg = criticalAlerts[0].message;
+    problemBadge = '🚨 عطل حرج رُصد';
+    problemPrompt = `تم رصد عطل حرج في شبكة RouterOS: "${problemMsg}". اشرح لي سبب المشكلة الدقيق، وقدّم خطوات الحل والإجراء الفوري المناسب.`;
+  } else if(openAlerts.length > 0){
+    problemMsg = openAlerts[0].message;
+    problemBadge = '⚠️ تنبيه يحتاج متابعة';
+    problemPrompt = `يوجد تنبيه نشط في الشبكة: "${problemMsg}". كيف نقوم بمعالجته والتحقق من عدم تأثيره على المشتركين؟`;
+  } else if(cpu >= 80){
+    problemMsg = `استهلاك المعالج مرتفع حاليًا بنسبة ${cpu}%، مما قد يؤدي لبطء استجابة المشتركين.`;
+    problemBadge = '⚡ حمل معالج مرتفع';
+    problemPrompt = `استهلاك المعالج في الراوتر مرتفع بنسبة ${cpu}%. ما هي الجلسات والعمليات المسببة وكيف نخفض الحمل فورًا؟`;
+  } else {
+    problemMsg = 'جميع العمليات والمؤشرات تعمل بشكل سليم. لا توجد تنبيهات حرجة مفتوحة.';
+    problemBadge = '✓ الشبكة مستقرة';
+    problemPrompt = 'أجرِ فحصاً شاملاً لحالة الراوتر والمستخدمين والواجهات وقدم تقريراً ملخصاً.';
+  }
+
   setText('#healthTitle', health==='مستقرة'?'الشبكة مستقرة':health==='يحتاج انتباه'?'توجد تنبيهات تحتاج متابعة':'تم رصد مشكلة تحتاج إجراء');
-  setText('#healthSub', health==='مستقرة'?'القراءات الحالية لا تظهر مؤشرات حرجة.':'راجع بطاقة التنبيهات والمساعد لمزيد من التفاصيل.');
+  setText('#healthSub', health==='مستقرة'?'القراءات الحالية لا تظهر مؤشرات حرجة.':'تفاصيل المشكلة موضحة أدناه ويمكنك حلها مباشرة مع المساعد الذكي.');
+  setText('#heroProblemText', problemMsg);
+  setText('#heroProblemBadge', problemBadge);
+
+  const fixBtn = $('#heroFixBtn');
+  if(fixBtn) fixBtn.onclick = () => askAiAboutProblem(problemPrompt);
+
   const orb=$('#healthOrb'); const score=health==='مستقرة'?82:health==='يحتاج انتباه'?56:26; if(orb){ orb.style.background=`conic-gradient(var(--${health==='مستقرة'?'success':'danger'}) 0 ${score}%, var(--surface-3) ${score}% 100%)`; const orbText=orb.querySelector('span'); if(orbText) orbText.textContent=health==='مستقرة'?'✓':'!'; }
   setText('#heroCpu', `${o.resource?.['cpu-load']??'—'}%`); setText('#heroRam', o.resource?.['total-memory']?`${Math.round((1-Number(o.resource['free-memory']||0)/Number(o.resource['total-memory']))*100)}%`:'—'); setText('#heroUsers', activeUsers.length); setText('#heroAlerts', openAlerts.length);
   setText('#kpiUsers', activeUsers.length); setText('#kpiUsage', bytes(total)); setText('#kpiSales', Number(s.summary.total||0).toLocaleString('ar-YE')); setText('#kpiSalesCount', `${s.summary.count||0} عملية`); setText('#kpiAlerts', openAlerts.length); setText('#lastUpdate', new Date().toLocaleTimeString('ar-YE',{hour:'2-digit',minute:'2-digit'})); setText('#usersCountBadge', `${activeUsers.length} متصل`);
 
+  // Active Users on Users page
   $('#users').innerHTML=activeUsers.slice(0,20).map(u=>`<tr><td><strong>${esc(u.user)}</strong></td><td dir="ltr">${esc(u.ip)}</td><td>${esc(u.uptime)}</td><td><strong>${bytes(u.totalBytes)}</strong></td></tr>`).join('')||'<tr><td colspan="4" class="muted">لا توجد جلسات نشطة.</td></tr>';
+
+  // Overview Active Users Widget
+  const overviewUsersTable = $('#overviewUsers');
+  if(overviewUsersTable){
+    overviewUsersTable.innerHTML=activeUsers.slice(0,5).map(u=>`<tr><td><strong>${esc(u.user)}</strong></td><td dir="ltr">${esc(u.ip)}</td><td>${esc(u.uptime)}</td><td><strong>${bytes(u.totalBytes)}</strong></td></tr>`).join('')||'<tr><td colspan="4" class="muted">لا توجد جلسات نشطة حالياً.</td></tr>';
+  }
 
   const interfaces=o.ifaceStats||[];
   $('#interfaces').innerHTML=interfaces.map(x=>`<div class="iface"><div class="iface-top"><div><div class="iface-name" title="${esc(x.name)}">${esc(x.name)}</div><div class="iface-meta">${esc(x.type||'interface')}</div></div><span class="iface-status ${x.running?'ok':'bad'}">${x.running?'● يعمل':'● متوقف'}</span></div><div class="iface-stats"><div class="iface-stat"><span>RX</span><strong>${bytes(x.rxBytes)}</strong></div><div class="iface-stat"><span>TX</span><strong>${bytes(x.txBytes)}</strong></div></div><div class="iface-meta" style="margin-top:8px">Queue drops: ${Number(x.txQueueDrop||0).toLocaleString('ar')}</div></div>`).join('')||'<div class="muted">لا توجد واجهات.</div>';
@@ -225,8 +275,42 @@ function renderOverview(o,s,alerts,ai){
 
   const alertItems=(alerts||[]).slice(0,9);
   setText('#alertCount', `${alertItems.length} مفتوح`);
-  $('#alertsList').innerHTML=alertItems.map(a=>`<article class="alert ${a.severity==='critical'?'critical':'warning'}"><div class="alert-head"><strong>${a.severity==='critical'?'حرج':'تنبيه'}</strong><button class="text-btn" data-ack="${esc(a.id)}" type="button">تمت المتابعة</button></div><p>${esc(a.message)}</p><time>${new Date(a.at).toLocaleString('ar-YE')}</time></article>`).join('')||'<article class="alert"><strong>لا توجد تنبيهات</strong><p>لا توجد مؤشرات مفتوحة حاليًا.</p></article>';
-  $('#alertsList').querySelectorAll('[data-ack]').forEach(btn=>btn.addEventListener('click',async()=>{try{await api(`/api/alerts/${btn.dataset.ack}`,{method:'POST'}); toast('تمت أرشفة التنبيه'); refresh();}catch(e){toast(e.message)}}));
+
+  // Alerts Page List with AI Diagnostic button
+  $('#alertsList').innerHTML=alertItems.map(a=>`<article class="alert ${a.severity==='critical'?'critical':'warning'}">
+    <div class="alert-head">
+      <div><strong class="alert-tag">${a.severity==='critical'?'حرج':'تنبيه'}</strong></div>
+      <div class="alert-actions-row">
+        <button class="ghost-btn compact ask-ai-btn" data-alert-msg="${esc(a.message)}" type="button"><span>✦</span> اسأل المساعد الذكي</button>
+        <button class="text-btn" data-ack="${esc(a.id)}" type="button">تمت المتابعة</button>
+      </div>
+    </div>
+    <p>${esc(a.message)}</p>
+    <time>${new Date(a.at).toLocaleString('ar-YE')}</time>
+  </article>`).join('')||'<article class="alert"><strong>لا توجد تنبيهات</strong><p>لا توجد مؤشرات مفتوحة حاليًا.</p></article>';
+
+  // Overview Alerts Widget with direct AI Consultation
+  const overviewAlertsList = $('#overviewAlertsList');
+  if(overviewAlertsList){
+    const previewAlerts = (openAlerts.length ? openAlerts : (alerts||[])).slice(0,4);
+    overviewAlertsList.innerHTML = previewAlerts.map(a=>`<div class="overview-alert-item ${a.severity==='critical'?'critical':''}">
+      <div class="overview-alert-top">
+        <span class="soft-badge ${a.severity==='critical'?'danger':''}">${a.severity==='critical'?'عطل حرج':'تنبيه'}</span>
+        <time>${new Date(a.at).toLocaleTimeString('ar-YE',{hour:'2-digit',minute:'2-digit'})}</time>
+      </div>
+      <p class="overview-alert-text">${esc(a.message)}</p>
+      <div class="overview-alert-actions">
+        <button class="ghost-btn compact ask-ai-btn" data-alert-msg="${esc(a.message)}" type="button"><span>✦</span> استشارة وحل بالمساعد</button>
+        <button class="text-btn" data-ack="${esc(a.id)}" type="button">أرشفة</button>
+      </div>
+    </div>`).join('') || '<div class="muted" style="padding:16px;text-align:center">✓ لا توجد تنبيهات مفتوحة حالياً. الشبكة بحالة ممتازة.</div>';
+  }
+
+  // Wire all Ask AI and Ack buttons
+  document.querySelectorAll('.ask-ai-btn').forEach(btn=>{
+    btn.onclick = () => askAiAboutProblem(`يوجد تنبيه مسجل في الراوتر: "${btn.dataset.alertMsg}". ما هو سبب هذا التنبيه، وكيف أقوم بحله بالكامل؟`);
+  });
+  document.querySelectorAll('[data-ack]').forEach(btn=>btn.addEventListener('click',async()=>{try{await api(`/api/alerts/${btn.dataset.ack}`,{method:'POST'}); toast('تمت أرشفة التنبيه'); refresh();}catch(e){toast(e.message)}}));
 
   $('#sales').innerHTML=(s.sales||[]).slice(-12).reverse().map(x=>`<div class="sale"><div><strong>${esc(x.package)}</strong><div class="muted">${esc(x.user||'—')} • ${esc(x.seller||'—')}</div></div><strong>${Number(x.amount||0).toLocaleString('ar-YE')} ريال</strong></div>`).join('')||'<div class="muted">لا توجد عمليات مسجلة اليوم.</div>';
   setText('#salesSummary', `${Number(s.summary.total||0).toLocaleString('ar-YE')} ريال`);
@@ -236,14 +320,14 @@ function renderOverview(o,s,alerts,ai){
 async function loadChats(){
   try{
     const r=await api('/api/chats'); state.chats=r.chats||[]; renderChatList();
-    if(!state.conversationId && state.chats[0]) await loadChat(state.chats[0].id);
+    if(!state.conversationId && state.chats[0]) await loadChat(state.chats[0].id, false);
     else if(!state.conversationId) await newChat(false);
   }catch(e){ toast('تعذر تحميل سجل المحادثات'); }
 }
 function renderChatList(){
   const box=$('#chatList'); if(!box)return;
   box.innerHTML=(state.chats||[]).map(c=>`<div class="chat-list-item ${c.id===state.conversationId?'active':''}" data-chat-id="${esc(c.id)}"><button class="chat-open" type="button"><strong>${esc(c.title||'محادثة جديدة')}</strong><span>${Number(c.messageCount||0)} رسالة</span></button><button class="chat-menu" type="button" title="خيارات">⋯</button></div>`).join('')||'<div class="muted history-empty">لا توجد محادثات بعد.</div>';
-  box.querySelectorAll('.chat-open').forEach(btn=>btn.addEventListener('click',()=>loadChat(btn.parentElement.dataset.chatId)));
+  box.querySelectorAll('.chat-open').forEach(btn=>btn.addEventListener('click',()=>loadChat(btn.parentElement.dataset.chatId, true)));
   box.querySelectorAll('.chat-menu').forEach(btn=>btn.addEventListener('click',async()=>{
     const id=btn.parentElement.dataset.chatId; const choice=prompt('اكتب: rename لإعادة التسمية أو delete للحذف','rename');
     if(choice==='delete'){ if(!confirm('حذف هذه المحادثة؟')) return; await api(`/api/chats/${id}`,{method:'DELETE'}); if(state.conversationId===id){state.conversationId=null; await loadChats();} else {await loadChats();} }
@@ -266,14 +350,14 @@ function closeChatDrawer(){
   $('#chatDrawerBackdrop')?.classList.remove('open');
 }
 
-async function loadChat(chatId){
+async function loadChat(chatId, autoRoute=true){
   closeChatDrawer();
   const chat=await api(`/api/chats/${encodeURIComponent(chatId)}`);
   state.conversationId=chat.id;
   setText('#activeChatTitle',chat.title||'محادثة جديدة');
   renderChatMessages(chat);
   renderChatList();
-  setRoute('assistant',true);
+  if(autoRoute) setRoute('assistant',true);
 }
 async function newChat(autoRoute=true){
   closeChatDrawer();
@@ -468,6 +552,25 @@ const scheduleBtn=$('#scheduleBackup'); if(scheduleBtn) scheduleBtn.onclick=asyn
   try{await api('/api/backups/schedule',{method:'POST',body:JSON.stringify({time:time+':00',interval,password,confirm:true,routerId:state.routerId})});toast('تم حفظ الجدولة على الراوتر');loadBackups();}catch(e){toast(e.message);}
 };
 const disableScheduleBtn=$('#disableBackupSchedule'); if(disableScheduleBtn) disableScheduleBtn.onclick=async()=>{if(!confirm('تعطيل الجدولة؟'))return;try{await api('/api/backups/schedule/disable',{method:'POST',body:JSON.stringify({confirm:true,routerId:state.routerId})});toast('تم تعطيل الجدولة');loadBackups();}catch(e){toast(e.message);}};
+
+function openMobileSidebar(){
+  $('#sidebar')?.classList.add('open');
+  $('#sidebarBackdrop')?.classList.add('open');
+  $('#mobileMenu')?.setAttribute('aria-expanded','true');
+}
+function closeMobileSidebar(){
+  $('#sidebar')?.classList.remove('open');
+  $('#sidebarBackdrop')?.classList.remove('open');
+  $('#mobileMenu')?.setAttribute('aria-expanded','false');
+}
+const mobileMenuBtn=$('#mobileMenu'); if(mobileMenuBtn) mobileMenuBtn.onclick=openMobileSidebar;
+const sidebarCloseBtn=$('#sidebarClose'); if(sidebarCloseBtn) sidebarCloseBtn.onclick=closeMobileSidebar;
+const sidebarBackdrop=$('#sidebarBackdrop'); if(sidebarBackdrop) sidebarBackdrop.onclick=closeMobileSidebar;
+
+const hubAi=$('#hubAiDiagnostic'); if(hubAi) hubAi.onclick=()=>askAiAboutProblem('أجرِ تشخيصاً شاملاً لجميع قياسات ومؤشرات الراوتر والشبكة واقترح تحسينات.');
+const hubUsers=$('#hubTopUsers'); if(hubUsers) hubUsers.onclick=()=>askAiAboutProblem('من هم أعلى 10 مستخدمين استهلاكاً للباندويث الآن؟ رتبهم مع استهلاكهم وعناوينهم.');
+const hubSec=$('#hubSecurityAudit'); if(hubSec) hubSec.onclick=()=>askAiAboutProblem('افحص إعدادات الحماية وجدار الحماية وسجل محاولات الدخول على الراوتر بحثاً عن أي ثغرات أمنية.');
+const hubTraf=$('#hubTrafficStability'); if(hubTraf) hubTraf.onclick=()=>askAiAboutProblem('حلل استقرار حركة المرور والواجهات، وهل توجد أي واجهة متوقفة أو بها drop queues؟');
 
 setupNav(); applyTheme();
 const routerSelect=$('#routerSelect'); if(routerSelect) routerSelect.onchange=()=>switchRouter(routerSelect.value);

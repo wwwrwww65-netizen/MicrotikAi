@@ -18,14 +18,19 @@
 <body>
   <a class="skip-link" href="#main">تخطي إلى المحتوى</a>
 
+  <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+
   <div class="app-shell">
-    <aside class="sidebar" aria-label="التنقل الرئيسي">
-      <div class="brand">
-        <div class="brand-mark" aria-hidden="true">J</div>
-        <div class="brand-copy">
-          <strong>Jeeey</strong>
-          <span>Network AI</span>
+    <aside class="sidebar" id="sidebar" aria-label="التنقل الرئيسي">
+      <div class="sidebar-head">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">J</div>
+          <div class="brand-copy">
+            <strong>Jeeey</strong>
+            <span>Network AI</span>
+          </div>
         </div>
+        <button class="icon-btn sidebar-close" id="sidebarClose" type="button" aria-label="إغلاق القائمة">✕</button>
       </div>
 
       <div class="router-summary">
@@ -87,13 +92,27 @@
                 </div>
                 <div class="health-orb" id="healthOrb" aria-hidden="true"><span>—</span></div>
               </div>
+
+              <!-- Diagnostic Problem Breakdown Banner -->
+              <div class="hero-problem-box" id="heroProblemBox">
+                <div class="problem-lead">
+                  <span class="problem-badge" id="heroProblemBadge">🔍 تشخيص</span>
+                  <p id="heroProblemText">جارٍ فحص استقرار الأجهزة والواجهات…</p>
+                </div>
+                <div class="problem-actions">
+                  <button class="primary-btn compact" id="heroFixBtn" type="button"><span>✦</span> حل وتشخيص بالمساعد</button>
+                  <button class="ghost-btn compact" id="heroAlertsBtn" type="button" data-nav="alerts"><span>△</span> عرض التنبيهات</button>
+                </div>
+              </div>
+
               <div class="hero-metrics">
-                <div><span>CPU</span><strong id="heroCpu">—</strong></div>
-                <div><span>الذاكرة</span><strong id="heroRam">—</strong></div>
-                <div><span>المستخدمون</span><strong id="heroUsers">—</strong></div>
-                <div><span>التنبيهات</span><strong id="heroAlerts">—</strong></div>
+                <div class="hero-metric-clickable" data-nav="network"><span>CPU</span><strong id="heroCpu">—</strong></div>
+                <div class="hero-metric-clickable" data-nav="network"><span>الذاكرة</span><strong id="heroRam">—</strong></div>
+                <div class="hero-metric-clickable" data-nav="users"><span>المستخدمون</span><strong id="heroUsers">—</strong></div>
+                <div class="hero-metric-clickable" data-nav="alerts"><span>التنبيهات</span><strong id="heroAlerts">—</strong></div>
               </div>
             </article>
+
             <article class="router-card">
               <div class="section-title-row">
                 <div><span class="eyebrow">الجهاز الرئيسي</span><h3 id="routerModel">MikroTik</h3></div>
@@ -105,14 +124,122 @@
                 <div><dt>مدة التشغيل</dt><dd id="routerUptime">—</dd></div>
                 <div><dt>الوضع</dt><dd id="routerMode">—</dd></div>
               </dl>
-              <button class="primary-btn wide" id="heroScan" type="button"><span>✦</span> شغّل الفحص الذكي</button>
+              <div class="button-row">
+                <button class="primary-btn wide" id="heroScan" type="button"><span>✦</span> شغّل الفحص الذكي</button>
+                <button class="ghost-btn" data-nav="routers" type="button" title="إدارة الأجهزة">الأجهزة ➔</button>
+              </div>
             </article>
           </div>
+
+          <!-- Clickable Interactive KPI Grid -->
           <div class="kpi-grid" aria-label="المؤشرات الرئيسية">
-            <article class="metric-card"><div class="metric-icon blue">◎</div><div><span>الجلسات النشطة</span><strong id="kpiUsers">—</strong><small>HotSpot الآن</small></div></article>
-            <article class="metric-card"><div class="metric-icon purple">↕</div><div><span>الاستهلاك الظاهر</span><strong id="kpiUsage">—</strong><small>جلسات نشطة</small></div></article>
-            <article class="metric-card"><div class="metric-icon green">◇</div><div><span>المبيعات اليوم</span><strong id="kpiSales">—</strong><small id="kpiSalesCount">— عملية</small></div></article>
-            <article class="metric-card"><div class="metric-icon amber">△</div><div><span>تنبيهات مفتوحة</span><strong id="kpiAlerts">—</strong><small>تحتاج متابعة</small></div></article>
+            <article class="metric-card clickable-card" data-nav="users" role="button" tabindex="0" title="انتقل لصفحة المستخدمين">
+              <div class="metric-icon blue">◎</div>
+              <div><span>الجلسات النشطة</span><strong id="kpiUsers">—</strong><small>HotSpot الآن ➔</small></div>
+            </article>
+            <article class="metric-card clickable-card" data-nav="network" role="button" tabindex="0" title="انتقل لصفحة الشبكة والأداء">
+              <div class="metric-icon purple">↕</div>
+              <div><span>الاستهلاك الظاهر</span><strong id="kpiUsage">—</strong><small>حركة الواجهات ➔</small></div>
+            </article>
+            <article class="metric-card clickable-card" data-nav="sales" role="button" tabindex="0" title="انتقل لصفحة المبيعات">
+              <div class="metric-icon green">◇</div>
+              <div><span>المبيعات اليوم</span><strong id="kpiSales">—</strong><small id="kpiSalesCount">— عملية ➔</small></div>
+            </article>
+            <article class="metric-card clickable-card" data-nav="alerts" role="button" tabindex="0" title="انتقل لصفحة التنبيهات">
+              <div class="metric-icon amber">△</div>
+              <div><span>تنبيهات مفتوحة</span><strong id="kpiAlerts">—</strong><small>متابعة المشاكل ➔</small></div>
+            </article>
+          </div>
+
+          <!-- Quick Access Hub -->
+          <div class="overview-quick-hub">
+            <div class="panel-headline">
+              <div>
+                <h3>مركز الوصول والإجراءات السريعة</h3>
+                <p>إجراءات فورية وفحوصات ذكية بنقرة واحدة</p>
+              </div>
+              <span class="soft-badge">وصول سريع</span>
+            </div>
+            <div class="quick-hub-grid">
+              <button class="quick-hub-btn" id="hubAiDiagnostic" type="button">
+                <span class="hub-icon gold">✦</span>
+                <div class="hub-copy">
+                  <strong>تشخيص شامل بالذكاء الاصطناعي</strong>
+                  <small>فحص المعالج، الذاكرة، والتنبيهات</small>
+                </div>
+              </button>
+              <button class="quick-hub-btn" id="hubTopUsers" type="button">
+                <span class="hub-icon blue">⚡</span>
+                <div class="hub-copy">
+                  <strong>أعلى 10 مستخدمين استهلاكاً</strong>
+                  <small>ترتيب فوري للجلسات الأكثر سحباً للبيانات</small>
+                </div>
+              </button>
+              <button class="quick-hub-btn" id="hubSecurityAudit" type="button">
+                <span class="hub-icon red">🛡️</span>
+                <div class="hub-copy">
+                  <strong>فحص أمان الراوتر والمنافذ</strong>
+                  <small>تدقيق جدار الحماية وسجل محاولات الدخول</small>
+                </div>
+              </button>
+              <button class="quick-hub-btn" id="hubTrafficStability" type="button">
+                <span class="hub-icon purple">📊</span>
+                <div class="hub-copy">
+                  <strong>استقرار حركة المرور والواجهات</strong>
+                  <small>فحص انقطاعات الواجهات وQueue Drops</small>
+                </div>
+              </button>
+              <button class="quick-hub-btn" data-nav="backups" type="button">
+                <span class="hub-icon green">💾</span>
+                <div class="hub-copy">
+                  <strong>النسخ الاحتياطي والأمان</strong>
+                  <small>تصدير RSC وإنشاء نسخة مشفرة</small>
+                </div>
+              </button>
+              <button class="quick-hub-btn" data-nav="commands" type="button">
+                <span class="hub-icon amber">⌘</span>
+                <div class="hub-copy">
+                  <strong>الترمنل وأوامر RouterOS</strong>
+                  <small>فحص وتنفيذ الأوامر مع التحقق الآمن</small>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Overview Live Preview Bento Grid -->
+          <div class="overview-bento-grid">
+            <!-- Alerts Live Widget -->
+            <article class="panel overview-widget">
+              <div class="panel-headline">
+                <div>
+                  <span class="eyebrow">المراقبة والتنبيهات</span>
+                  <h3>التنبيهات المفتوحة</h3>
+                  <p>المشاكل التي تم رصدها وتحتاج تدخل</p>
+                </div>
+                <button class="ghost-btn compact" data-nav="alerts" type="button">عرض الكل ➔</button>
+              </div>
+              <div id="overviewAlertsList" class="overview-alerts-list"></div>
+            </article>
+
+            <!-- Active Users Live Widget -->
+            <article class="panel overview-widget">
+              <div class="panel-headline">
+                <div>
+                  <span class="eyebrow">الجلسات</span>
+                  <h3>أعلى المستخدمين نشاطاً</h3>
+                  <p>أحدث جلسات HotSpot استهلاكاً للبيانات</p>
+                </div>
+                <button class="ghost-btn compact" data-nav="users" type="button">عرض كل المستخدمين ➔</button>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr><th>المستخدم</th><th>IP</th><th>المدة</th><th>الاستهلاك</th></tr>
+                  </thead>
+                  <tbody id="overviewUsers"></tbody>
+                </table>
+              </div>
+            </article>
           </div>
         </section>
 
